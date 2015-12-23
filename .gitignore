@@ -11,6 +11,7 @@
 # Generated files
 bin/
 gen/
+.navigation/
 
 # Gradle files
 .gradle/
@@ -25,3 +26,11 @@ proguard/
 
 # Log Files
 *.log
+
+# Windows thumbnail db
+Thumbs.db
+
+# Ignore Idea files
+.idea/
+*.iml
+
