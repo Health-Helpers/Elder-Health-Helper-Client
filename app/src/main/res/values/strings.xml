@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">Elder Health Helper Patient</string>
+    <string name="welcomeMsg">Welcome</string>
+    <string name="welcomeResp">Welcome to responsible APP</string>
+    <string name="settings">Settings</string>
+    <string name="pair">Pair Button</string>
+    <string name="call">Call</string>
+    <string name="phone_number">654321123</string>
+    <string name="check_number">Checking your phone number</string>
+
+    <string name="closeDrawer">Navigation View</string>
+    <string name="openDrawer">Navigation View Closed</string>
+    <string name="action_websearch">Web search</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
+
+    <string name="locatePatient">Locate Patient</string>
+    <string name="user">Patient</string>
+    <string name="responsible">Responsible</string>
+
+
+    <string name="patientSettings">Patient Settings</string>
+    <string name="patientSettingsAlert">Alerts</string>
+    <string name="patientSettingsZone">Secure Zone</string>
+    <string name="patientSettingsName">Name</string>
+
+
+    <string name="responsibleSettingsNewPatient">New Patient</string>
+    <string name="responsibleSettingsNewResponsible">New Responsible</string>
+    <string name="responsibleSettingsChangeIdiom">Change Locale</string>
+    <string name="responsibleSettingsChange">Other Settings</string>
+
+
+    <!-- MENU -->
+    <string name="home">Home</string>
+    <string name="patientsList">Patients List</string>
+    <string name="medicalCenters">Medical Centers</string>
+    <string name="configuration">Configuration</string>
+
+
+    <!-- CLOSE DIALOG-->
+    <string name="close">Exit</string>
+    <string name="close_body">Do you want to leave?</string>
+    <string name="Accept">Accept</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- INTERNET -->
+    <string name="internet_tittle">Internet Connection</string>
+    <string name="internet_body">There\'s no internet connection. Please turn on WiFi or Mobile data.</string>
+    <string name="logout">logout</string>
+    <string name="name_header">Name</string>
+    <string name="birthdate_header">BirthDate</string>
+    <string name="phone_header">Phone</string>
+    <string name="address_header">Address</string>
+    <string name="loading">Loading...</string>
+    <string name="update">Update</string>
+
+</resources>

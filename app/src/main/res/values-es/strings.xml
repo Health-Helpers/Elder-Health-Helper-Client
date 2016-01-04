@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Elder Health Helper Patient</string>
+    <string name="welcomeMsg">Bienvenido</string>
+    <string name="check_number">Comprobando su número</string>
+
+    <string name="user">Paciente</string>
+    <string name="responsible">Responsable</string>
+    <string name="welcomeResp">Bienvenido a la APP del responsable</string>
+
+    <string name="closeDrawer">Navigation View</string>
+    <string name="openDrawer">Navigation View Cerrado</string>
+    <string name="app_not_available">Disculpe, no hay navegador web disponible</string>
+
+    <string name="phone_number">654321123</string>
+    <string name="Accept">Aceptar</string>
+    <string name="action_websearch"></string>
+    <string name="call">Llamada</string>
+    <string name="cancel">Cancelar</string>
+    <string name="close">Salir</string>
+    <string name="close_body">Quiere salir de la aplicación?</string>
+    <string name="locatePatient">Localizar Paciente</string>
+    <string name="logout">Salir</string>
+    <string name="pair">Emparejar Botón</string>
+    <string name="patientSettings">Ajustes Paciente</string>
+    <string name="patientSettingsAlert">Alertas</string>
+    <string name="patientSettingsName">Nombre</string>
+    <string name="patientSettingsZone">Zona Segura</string>
+    <string name="responsibleSettingsChange">Otros Ajustes</string>
+    <string name="responsibleSettingsChangeIdiom">Cambiar idioma</string>
+    <string name="responsibleSettingsNewPatient">Nuevo Paciente</string>
+    <string name="responsibleSettingsNewResponsible">Nuevo Responsable</string>
+    <string name="settings">Ajustes</string>
+
+
+    <!-- MENU -->
+    <string name="home">Inicio</string>
+    <string name="patientsList">Listado de pacientes</string>
+    <string name="medicalCenters">Centros Medicos</string>
+    <string name="configuration">Configuración</string>
+
+    <!-- INTERNET -->
+    <string name="internet_tittle">Conexión a Internet</string>
+    <string name="internet_body">No hay conexión a internet disponible</string>
+    <string name="name_header">Nombre</string>
+    <string name="birthdate_header">Fecha de nacimiento</string>
+    <string name="phone_header">Teléfono</string>
+    <string name="address_header">Dirección</string>
+    <string name="loading">Loading...</string>
+    <string name="update">Update</string>
+
+</resources>
