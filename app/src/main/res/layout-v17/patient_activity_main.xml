@@ -11,14 +11,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.hh.ehh.patient.PatientMainActivity">
 
-    <TextClock
-        android:id="@+id/textClock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="43dp"
-        android:textSize="30dp" />
 
     <Button
         android:id="@+id/btnBluetooth"
@@ -28,7 +20,6 @@
         android:text="@string/pair"
         android:textColor="#ffffff"
         android:background="@drawable/custom_blue_button"
-        android:layout_below="@+id/textClock"
         android:layout_alignRight="@+id/callBtn"
         android:layout_alignEnd="@+id/callBtn"
         android:layout_alignLeft="@+id/callBtn"
@@ -46,24 +37,8 @@
         android:textStyle="bold"
         android:background="@drawable/custom_green_button"
         android:textSize="60dp"
-        android:layout_above="@+id/settingsBtn"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="53dp" />
-
-    <Button
-        android:id="@+id/settingsBtn"
-        android:layout_width="150dp"
-        android:layout_height="75dp"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/settings"
-        android:textColor="#ffffff"
-        android:background="@drawable/custom_blue_button"
-        android:textSize="30dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/callBtn"
-        android:layout_alignStart="@+id/callBtn"
-        android:layout_alignRight="@+id/callBtn"
-        android:layout_alignEnd="@+id/callBtn" />
 
 
 </RelativeLayout>

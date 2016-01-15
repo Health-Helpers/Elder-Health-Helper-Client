@@ -1,24 +1,18 @@
 package com.hh.ehh.patient;
 
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.hh.ehh.R;
 import com.hh.ehh.bluetooth.BluetoothSPP;
+import com.hh.ehh.service.EHHService;
+import com.hh.ehh.service.LocationService;
 import com.hh.ehh.ui.customdialogs.CustomDialogs;
 import com.hh.ehh.utils.FragmentStackManager;
 
-import java.util.ArrayList;
-
-public class PatientMainActivity extends AppCompatActivity {
+public class PatientMainActivity extends Activity {
 
     private FragmentStackManager fragmentStackManager;
     private BluetoothSPP bt;
@@ -26,16 +20,11 @@ public class PatientMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.patient_home_fragment);
-        Fragment patientHome = new PatientHomeFragment();
-        fragmentStackManager = FragmentStackManager.getInstance(this);
-        fragmentStackManager.loadFragment(patientHome, R.id.home_frame_container);
-
-
-        bt = new BluetoothSPP(this);
-        if(!bt.isBluetoothEnabled()) {
-            bt.enable();
-        }
+        //setContentView(R.layout.patient_home_fragment);
+        startService(new Intent(this, EHHService.class));
+        startService(new Intent(this, LocationService.class));
+        Toast.makeText(this.getApplicationContext(), "Service Started!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     @Override

@@ -30,11 +30,12 @@ public class SoapWebServiceConnection {
     private static String UPDATE_PATIENT = "updatePatient";
     private static String UPDATE_RESPONSIBLE = "updateResponsible";
     private static String GET_RESPONSIBLE_PATIENTS = "getResponsiblePatients";
+    private static String SEND_PATIENT_LOCATION = "sendPatientLocation";
 
     private static String NAMESPACE = "http://ws.ehh.cat/";
-    private static String SOAP_WS_CONTROLLER = "/SoapWSController";
+    private static String SOAP_WS_CONTROLLER = "SoapWSController";
     private static String SOAP_ACTION = NAMESPACE + SOAP_WS_CONTROLLER;
-    private static String URL = "http://alumnes-grp04.udl.cat/EHHWeb" + SOAP_WS_CONTROLLER;
+    private static String URL = "http://alumnes-grp04.udl.cat/EHHWeb" + "/" +SOAP_WS_CONTROLLER;
 
     public static boolean checkInternetConnection(Context context) {
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -87,6 +88,20 @@ public class SoapWebServiceConnection {
         return GET(action, envelope);
     }
 
+    public String sendPatientLocation(@NonNull String patientId,@NonNull String date,@NonNull String latitude,@NonNull String longitude) {
+        String action = SOAP_ACTION + "/" + SEND_PATIENT_LOCATION;
+        SoapObject request = new SoapObject(NAMESPACE, SEND_PATIENT_LOCATION);
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet = true;
+        request.addProperty("latitude",latitude);
+        request.addProperty("longitude", longitude);
+        request.addProperty("patientId", Integer.valueOf(patientId));
+        request.addProperty("locationDate", date);
+
+        envelope.setOutputSoapObject(request);
+        return GET(action, envelope);
+    }
+
     private String GET(String action, SoapSerializationEnvelope envelope) {
         HttpTransportSE transporte = new HttpTransportSE(URL);
         try {
@@ -94,6 +109,7 @@ public class SoapWebServiceConnection {
             Object response = envelope.getResponse();
             return String.valueOf(response);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
