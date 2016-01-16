@@ -33,7 +33,7 @@ public class LocationService extends Service implements
     private static final String TAG = "LocationService";
     private static int UPDATE_INTERVAL = 10000; // 10 sec
     private static int FATEST_INTERVAL = 5000; // 5 sec
-    private static int DISPLACEMENT = 1; // 10 meters
+    private static int DISPLACEMENT = 10; // 10 meters
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private PostLocation postLocation;
@@ -127,10 +127,10 @@ public class LocationService extends Service implements
             Log.e(TAG, "position: " + location.getLatitude() + ", " + location.getLongitude() + " accuracy: " + location.getAccuracy());
             // we have our desired accuracy of 10 meters so lets quit this service,
             // onDestroy will be called and stop our location uodates
-           // if (location.getAccuracy() <= 10) {
+            if (location.getAccuracy() <= 10) {
                 stopLocationUpdates();
                 sendLocationDataToWebsite(location);
-            //}
+            }
         }
     }
 

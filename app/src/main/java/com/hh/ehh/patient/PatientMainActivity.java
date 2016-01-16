@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.hh.ehh.bluetooth.BluetoothSPP;
+import com.hh.ehh.service.BluetoothEhhService;
 import com.hh.ehh.service.EHHService;
 import com.hh.ehh.service.LocationService;
 import com.hh.ehh.ui.customdialogs.CustomDialogs;
@@ -23,7 +24,8 @@ public class PatientMainActivity extends Activity {
         //setContentView(R.layout.patient_home_fragment);
         startService(new Intent(this, EHHService.class));
         startService(new Intent(this, LocationService.class));
-        Toast.makeText(this.getApplicationContext(), "Service Started!", Toast.LENGTH_SHORT).show();
+        startService(new Intent(this, BluetoothEhhService.class));
+        Toast.makeText(this.getApplicationContext(), "Services Started!", Toast.LENGTH_SHORT).show();
         finish();
     }
 
