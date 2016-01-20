@@ -44,7 +44,7 @@ public class BluetoothEhhService extends Service {
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // String for MAC address
-    private static String address = "20:14:02:17:13:02";
+    private static String address = "20:14:02:17:10:85";
 
 
 
@@ -64,14 +64,12 @@ public class BluetoothEhhService extends Service {
                     txtString = "Data Received = " + dataInPrint;
                     Log.d("Tag", "Received From Bluetooth:" + txtString);
                     if(dataInPrint.equalsIgnoreCase("PANIC")){
-                        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + "11111111"));
+                        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + "+34662420050"));
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }
-                    recDataString.delete(0, recDataString.length()); 					//clear all string data
-                    txtString = " ";
-
-
+                    recDataString = new StringBuilder(); 					//clear all string data
+                    txtString = "";
                 }
             }
         };
