@@ -49,6 +49,10 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.parse.Parse;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
+import com.parse.ParseQuery;
 
 
 /**
@@ -174,6 +178,17 @@ public class GeofenceService extends IntentService implements
 
     private void sendNotification(String notificationDetails) {
         //TODO: Send a Push Notification
+        String installationId =  ParseInstallation.getCurrentInstallation().getInstallationId();
+
+        // Create our Installation query
+        ParseQuery pushQuery = ParseInstallation.getQuery();
+        pushQuery.whereEqualTo("installationId", installationId);
+
+        // Send push notification to query
+        ParsePush push = new ParsePush();
+        push.setQuery(pushQuery); // Set our Installation query
+        push.setMessage(notificationDetails);
+        push.sendInBackground();
     }
 
     private String getTransitionString(int transitionType) {
