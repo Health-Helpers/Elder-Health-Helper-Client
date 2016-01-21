@@ -9,6 +9,7 @@ import android.content.Context;
 
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import android.os.Bundle;
@@ -56,16 +57,40 @@ import com.google.android.gms.common.api.Status;
 public class GeofenceService extends IntentService implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>{
 
+
+    /**
+     * Used when requesting to add or remove geofences.
+     */
+    private PendingIntent mGeofencePendingIntent;
+
+    /**
+     * Used to persist application state about whether geofences were added.
+     */
+    private SharedPreferences mSharedPreferences;
+
+
+    /**
+     * Used to keep track of whether geofences were added.
+     */
+    private boolean mGeofencesAdded;
+
     protected static final String TAG = "GeofenceTransitionsIS";
     private ReadGeofence readGeofences;
     public static final String ARG_PATIENT_NUMBER = "patient_number";
     Patient patient;
     protected ArrayList<com.google.android.gms.location.Geofence> mGeofenceList;
-    private PendingIntent mGeofencePendingIntent;
+
     protected GoogleApiClient mGoogleApiClient;
+    List<com.hh.ehh.model.Geofence> geofencesList;
+
 
     public GeofenceService() {
         super(TAG);
+    }
+
+    public GeofenceService(GoogleApiClient mGoogleApiClient) {
+        super(TAG);
+        this.mGoogleApiClient = mGoogleApiClient;
     }
 
     @Nullable
@@ -75,11 +100,20 @@ public class GeofenceService extends IntentService implements
     }
 
     protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
+
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+
+            if (!mGoogleApiClient.isConnected() || !mGoogleApiClient.isConnecting()) {
+                mGoogleApiClient.connect();
+            }
+        } else {
+            Log.e(TAG, "unable to connect to google play services.");
+        }
     }
 
     @Override
@@ -139,7 +173,7 @@ public class GeofenceService extends IntentService implements
     }
 
     private void sendNotification(String notificationDetails) {
-
+        //TODO: Send a Push Notification
     }
 
     private String getTransitionString(int transitionType) {
@@ -159,22 +193,31 @@ public class GeofenceService extends IntentService implements
         // Gets data from the incoming Intent
         Log.d("Tag", "Geofencing Service Started!!!!!!!");
         super.onCreate();
-        this.mGeofenceList = new ArrayList<>();
+        // Empty list for storing geofences.
+        mGeofenceList = new ArrayList<com.google.android.gms.location.Geofence>();
+
+        // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
+        mGeofencePendingIntent = null;
+
+        // Retrieve an instance of the SharedPreferences object.
+        mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,MODE_PRIVATE);
+
+        // Get the value of mGeofencesAdded from SharedPreferences. Set to false as a default.
+        mGeofencesAdded = mSharedPreferences.getBoolean(Constants.GEOFENCES_ADDED_KEY, false);
+
+        geofencesList = new ArrayList<>();
+
         this.patient = new Patient();
 
         //FIXME: Recuperar el patientId correctamente
         this.patient.setId("1");
 
-
-        readPatientGeofences(patient);
-
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
-
     }
 
-    private void readPatientGeofences(Patient patient){
-        readGeofences = new ReadGeofence();
+    private void readPatientGeofences(Patient patient, List<com.hh.ehh.model.Geofence> geofencesList){
+        readGeofences = new ReadGeofence(geofencesList);
         try {
             readGeofences.execute(patient).get();
         } catch (InterruptedException e) {
@@ -192,8 +235,7 @@ public class GeofenceService extends IntentService implements
         Intent intent = new Intent(this, GeofenceService.class);
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -212,85 +254,40 @@ public class GeofenceService extends IntentService implements
     }
 
     private void createGeofence(double latitude, double longitude, int radius, String geofenceType, String title){
-
-
-        LatLng geofenceCenter = new LatLng(latitude, longitude);
-
-        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
-
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-
-            if (!mGoogleApiClient.isConnected() || !mGoogleApiClient.isConnecting()) {
-                mGoogleApiClient.connect();
-            }
-        } else {
-            Log.e(TAG, "unable to connect to google play services.");
-        }
-
         mGeofenceList.add(new com.google.android.gms.location.Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this
-                // geofence.
                 .setRequestId(title)
-
-                        // Set the circular region of this geofence.
-                .setCircularRegion(
-                        latitude, longitude,
-                        radius
-                )
-
-                        // Set the expiration duration of the geofence. This geofence gets automatically
-                        // removed after this period of time.
+                .setCircularRegion(latitude, longitude,radius)
                 .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-
-                        // Set the transition types of interest. Alerts are only generated for these
-                        // transition. We track entry and exit transitions in this sample.
                 .setTransitionTypes(com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER |
                         com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT)
-
-                        // Create the geofence.
                 .build());
 
-
-
-        LocationServices.GeofencingApi.addGeofences(
-                mGoogleApiClient,
-                // The GeofenceRequest object.
-                getGeofencingRequest(),
-                // A pending intent that that is reused when calling removeGeofences(). This
-                // pending intent is used to generate an intent when a matched geofence
-                // transition is observed.
-                getGeofencePendingIntent()
+        LocationServices.GeofencingApi.addGeofences(mGoogleApiClient,getGeofencingRequest(),getGeofencePendingIntent()
         );
     }
-
-      //  Marker stopMarker = googleMap.addMarker(new MarkerOptions().draggable(true).position(geofenceCenter).title(title).infoWindowAnchor(10, 10).draggable(true).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_ehh)));
-
-
-        //googleMap.addCircle(new CircleOptions().center(geofenceCenter).radius(radius).strokeColor(Color.parseColor("#ffff00")).fillColor(Color.TRANSPARENT));
 
 
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "Connected to GoogleApiClient");
+        readPatientGeofences(patient, geofencesList);
+
+
+        if(readGeofences!=null && readGeofences.geofencesList!=null && readGeofences.geofencesList.size()>0){
+            for (com.hh.ehh.model.Geofence geofence : readGeofences.geofencesList) {
+                createGeofence(Double.parseDouble(geofence.getLatitude()), Double.parseDouble(geofence.getLongitude()),Integer.parseInt(geofence.getRadius()), "CIRCLE", geofence.getGeofenceId());
+            }
+        }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
-        // onConnectionFailed.
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
     @Override
     public void onConnectionSuspended(int cause) {
-        // The connection to Google Play services was lost for some reason.
         Log.i(TAG, "Connection suspended");
-
-        // onConnected() will be called again automatically when the service reconnects
     }
 
     public void onResult(Status status) {
@@ -298,33 +295,28 @@ public class GeofenceService extends IntentService implements
     }
 
 
-    private class ReadGeofence extends AsyncTask<Patient, Void, List<Geofence>> {
+    private class ReadGeofence extends AsyncTask<Patient, Void, List<com.hh.ehh.model.Geofence>> {
 
-        private SoapWebServiceConnection soapWebServiceConnection;
-        private Geofence geofence;
+        List<com.hh.ehh.model.Geofence> geofencesList;
 
-        Patient patient;
-
-
-        public ReadGeofence(){}
-
-        public ReadGeofence(SoapWebServiceConnection soapWebServiceConnection,Patient patient) {
-            this.soapWebServiceConnection = soapWebServiceConnection;
-            this.patient = patient;
+        public ReadGeofence(List<com.hh.ehh.model.Geofence> geofencesList){
+            this.geofencesList = geofencesList;
         }
 
+
         @Override
-        protected List<Geofence> doInBackground(Patient... params) {
+        protected List<com.hh.ehh.model.Geofence> doInBackground(Patient... params) {
             Patient patient = params[0];
             SoapWebServiceConnection connection = SoapWebServiceConnection.getInstance(getApplicationContext());
             String rawXML = connection.getPatientGeofence(patient);
-            List<Geofence> geofences = null;
+            List<com.hh.ehh.model.Geofence> geofences = null;
             try {
                 if (rawXML != null)
                     geofences = XMLHandler.getPatientGeofences(rawXML);
             } catch (XmlPullParserException | IOException e) {
                 e.printStackTrace();
             }
+            geofencesList = geofences;
             return geofences;
         }
 
@@ -334,16 +326,8 @@ public class GeofenceService extends IntentService implements
         }
 
         @Override
-        protected void onPostExecute(List<Geofence> geofences) {
+        protected void onPostExecute(List<com.hh.ehh.model.Geofence> geofences) {
             super.onPostExecute(geofences);
-            if(geofences!=null) {
-
-
-
-                for (Geofence geofence : geofences) {
-                    createGeofence(Double.parseDouble(geofence.getLatitude()), Double.parseDouble(geofence.getLongitude()),Integer.parseInt(geofence.getRadius()), "CIRCLE", geofence.getGeofenceId());
-                }
-            }
         }
     }
 }
