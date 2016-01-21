@@ -2,11 +2,9 @@ package com.hh.ehh.patient;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
+
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,7 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ConsoleMessage;
+
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -24,7 +22,7 @@ import com.hh.ehh.bluetooth.BluetoothState;
 import com.hh.ehh.bluetooth.DeviceList;
 
 
-import java.util.ArrayList;
+
 
 /**
  * Created by mpifa on 23/11/15.

@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import com.hh.ehh.bluetooth.BluetoothSPP;
 import com.hh.ehh.service.BluetoothEhhService;
-import com.hh.ehh.service.EHHService;
+import com.hh.ehh.service.GeofenceService;
 import com.hh.ehh.service.LocationService;
 import com.hh.ehh.ui.customdialogs.CustomDialogs;
 import com.hh.ehh.utils.FragmentStackManager;
@@ -22,9 +22,9 @@ public class PatientMainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.patient_home_fragment);
-        startService(new Intent(this, EHHService.class));
         startService(new Intent(this, LocationService.class));
         startService(new Intent(this, BluetoothEhhService.class));
+        //startService(new Intent(this, GeofenceService.class));
         Toast.makeText(this.getApplicationContext(), "Services Started!", Toast.LENGTH_SHORT).show();
         finish();
     }

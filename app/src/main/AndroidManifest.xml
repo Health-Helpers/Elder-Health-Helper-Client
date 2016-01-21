@@ -80,16 +80,14 @@
         </receiver>
 
         <service
-            android:name=".service.EHHService"
-            android:exported="false"/>
-
-        <service
             android:name=".service.LocationService"
             android:exported="false"/>
 
         <service
             android:name=".service.BluetoothEhhService"
             android:exported="false"/>
+
+        <service android:name=".service.GeofenceService"/>
 
     </application>
 

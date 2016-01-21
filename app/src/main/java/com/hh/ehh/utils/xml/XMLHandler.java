@@ -2,6 +2,7 @@ package com.hh.ehh.utils.xml;
 
 import android.util.Xml;
 
+import com.hh.ehh.model.Geofence;
 import com.hh.ehh.model.Patient;
 import com.hh.ehh.model.User;
 
@@ -32,6 +33,15 @@ public class XMLHandler {
     private static final String PATIENTS = "patients";
     private static final String PATIENT_HEAD = "getResponsiblePatientsResponse";
     private static final String ENCODING = "UTF-8";
+
+
+    private static final String GEOFENCE_RESPONSE_HEAD = "getPatientGeofenceResponse";
+    private static final String GEOFENCES = "geofences";
+    private static final String GEOFENCE = "geofence";
+    private static final String GEOFENCE_ID = "id";
+    private static final String GEOFENCE_LATITUDE = "latitude";
+    private static final String GEOFENCE_LONGITUDE = "longitude";
+    private static final String GEOFENCE_RADIUS = "radius";
 
     private static XmlPullParserFactory xmlFactoryObject;
 
@@ -109,31 +119,31 @@ public class XMLHandler {
             String name = parser.getName();
             switch (name) {
                 case ID_PATIENT:
-                    builder.setId(reatString(parser, ID_PATIENT));
+                    builder.setId(readString(parser, ID_PATIENT));
                     break;
                 case ID_DOC:
-                    builder.setIdDoc(reatString(parser, ID_DOC));
+                    builder.setIdDoc(readString(parser, ID_DOC));
                     break;
                 case NAME:
-                    builder.setName(reatString(parser, NAME));
+                    builder.setName(readString(parser, NAME));
                     break;
                 case SURNAME:
-                    builder.setSurname(reatString(parser, SURNAME));
+                    builder.setSurname(readString(parser, SURNAME));
                     break;
                 case BIRTHDATE:
-                    builder.setBirthdate(reatString(parser, BIRTHDATE));
+                    builder.setBirthdate(readString(parser, BIRTHDATE));
                     break;
                 case ADDRESS:
-                    builder.setAddress(reatString(parser, ADDRESS));
+                    builder.setAddress(readString(parser, ADDRESS));
                     break;
                 case PHONE:
-                    builder.setPhone(reatString(parser, PHONE));
+                    builder.setPhone(readString(parser, PHONE));
                     break;
                 case DISEASE:
-                    disease = reatString(parser, DISEASE);
+                    disease = readString(parser, DISEASE);
                     break;
                 case DEPGRADE:
-                    dependencyGrade = reatString(parser, DEPGRADE);
+                    dependencyGrade = readString(parser, DEPGRADE);
                     break;
                 default:
                     skipTag(parser);
@@ -146,7 +156,7 @@ public class XMLHandler {
         return patient;
     }
 
-    private static String reatString(XmlPullParser parser, String TAG) throws IOException, XmlPullParserException {
+    private static String readString(XmlPullParser parser, String TAG) throws IOException, XmlPullParserException {
         final String ns = "";
         parser.require(XmlPullParser.START_TAG, ns, TAG);
         String nombre = getText(parser);
@@ -238,6 +248,91 @@ public class XMLHandler {
         patient.setDiseases(disease);
         patient.setDependencyGrade(dependencyGrade);
         return patient;
+    }
+
+    public static List<Geofence> getPatientGeofences(String stringXML) throws XmlPullParserException, IOException {
+        InputStream stream = new ByteArrayInputStream(stringXML.getBytes(ENCODING));
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+            parser.setInput(stream, null);
+            parser.nextTag();
+            return parseGeofences(parser);
+        } finally {
+            stream.close();
+        }
+    }
+
+    private static List<Geofence> parseGeofences(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+
+        final String ns = "";
+        List<Geofence> geofenceList = new ArrayList<>();
+
+        parser.require(XmlPullParser.START_TAG, ns, GEOFENCE_RESPONSE_HEAD);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals(GEOFENCES)) {
+                readGeofences(parser,geofenceList);
+            } else {
+                skipTag(parser);
+            }
+        }
+
+        return geofenceList;
+    }
+
+    private static void readGeofences(XmlPullParser parser, List<Geofence> geofenceList) throws IOException, XmlPullParserException {
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(GEOFENCE)) {
+                geofenceList.add(readGeofence(parser));
+            } else {
+                skipTag(parser);
+            }
+        }
+    }
+
+    private static Geofence readGeofence(XmlPullParser parser) throws IOException, XmlPullParserException {
+
+
+        final String ns = "";
+        Geofence geofence = new Geofence();
+
+        parser.require(XmlPullParser.START_TAG, ns, GEOFENCE);
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String name = parser.getName();
+            switch (name) {
+                case GEOFENCE_ID:
+                    geofence.setGeofenceId(readString(parser, GEOFENCE_ID));
+                    break;
+                case GEOFENCE_RADIUS:
+                    geofence.setRadius(readString(parser, GEOFENCE_RADIUS));
+                    break;
+                case GEOFENCE_LATITUDE:
+                    geofence.setLatitude(readString(parser, GEOFENCE_LATITUDE));
+                    break;
+                case GEOFENCE_LONGITUDE:
+                    geofence.setLongitude(readString(parser, GEOFENCE_LONGITUDE));
+                    break;
+                default:
+                    skipTag(parser);
+                    break;
+            }
+        }
+
+        return geofence;
     }
 }
 

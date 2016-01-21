@@ -11,6 +11,10 @@ public class Patient extends User implements Parcelable {
     private String dependencyGrade;
     private String disease;
 
+    public Patient() {
+      super();
+    }
+
     public Patient(User user) {
         super(user);
         dependencyGrade = null;
