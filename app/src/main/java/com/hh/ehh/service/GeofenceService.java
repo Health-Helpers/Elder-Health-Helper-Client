@@ -1,41 +1,36 @@
 package com.hh.ehh.service;
 
 import android.app.IntentService;
-
 import android.app.PendingIntent;
-
-
 import android.content.Context;
-
 import android.content.Intent;
-
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-
-import com.google.android.gms.maps.model.LatLng;
-
 import com.hh.ehh.R;
-import com.hh.ehh.model.Geofence;
 import com.hh.ehh.model.Patient;
 import com.hh.ehh.networking.SoapWebServiceConnection;
-
 import com.hh.ehh.utils.Constants;
 import com.hh.ehh.utils.GeofenceErrorMessages;
 import com.hh.ehh.utils.xml.XMLHandler;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
+import com.parse.ParseQuery;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -45,16 +40,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.parse.Parse;
-import com.parse.ParseInstallation;
-import com.parse.ParsePush;
-import com.parse.ParseQuery;
-
-
 /**
  * Created by Ivan on 21/01/2016.
  */
@@ -62,30 +47,25 @@ public class GeofenceService extends IntentService implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>{
 
 
+    public static final String ARG_PATIENT_NUMBER = "patient_number";
+    protected static final String TAG = "GeofenceTransitionsIS";
+    protected ArrayList<com.google.android.gms.location.Geofence> mGeofenceList;
+    protected GoogleApiClient mGoogleApiClient;
+    Patient patient;
+    List<com.hh.ehh.model.Geofence> geofencesList;
     /**
      * Used when requesting to add or remove geofences.
      */
     private PendingIntent mGeofencePendingIntent;
-
     /**
      * Used to persist application state about whether geofences were added.
      */
     private SharedPreferences mSharedPreferences;
-
-
     /**
      * Used to keep track of whether geofences were added.
      */
     private boolean mGeofencesAdded;
-
-    protected static final String TAG = "GeofenceTransitionsIS";
     private ReadGeofence readGeofences;
-    public static final String ARG_PATIENT_NUMBER = "patient_number";
-    Patient patient;
-    protected ArrayList<com.google.android.gms.location.Geofence> mGeofenceList;
-
-    protected GoogleApiClient mGoogleApiClient;
-    List<com.hh.ehh.model.Geofence> geofencesList;
 
 
     public GeofenceService() {
@@ -177,7 +157,6 @@ public class GeofenceService extends IntentService implements
     }
 
     private void sendNotification(String notificationDetails) {
-        //TODO: Send a Push Notification
         String installationId =  ParseInstallation.getCurrentInstallation().getInstallationId();
 
         // Create our Installation query

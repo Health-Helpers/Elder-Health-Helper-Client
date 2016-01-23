@@ -4,7 +4,6 @@ package com.hh.ehh.bluetooth;
  * Created by Carolina on 20/12/2015.
  */
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -28,7 +27,7 @@ import com.hh.ehh.R;
 
 import java.util.Set;
 
-@SuppressLint("NewApi")
+
 public class DeviceList extends Activity {
     // Debugging
     private static final String TAG = "BluetoothSPP";
@@ -37,8 +36,70 @@ public class DeviceList extends Activity {
     // Member fields
     private BluetoothAdapter mBtAdapter;
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
+    // The BroadcastReceiver that listens for discovered devices and
+    // changes the title when discovery is finished
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                // If it's already paired, skip it, because it's been listed already
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    String strNoFound = getIntent().getStringExtra("no_devices_found");
+                    if(strNoFound == null)
+                        strNoFound = "No EHH Button found";
+
+                    if(mPairedDevicesArrayAdapter.getItem(0).equals(strNoFound)) {
+                        mPairedDevicesArrayAdapter.remove(strNoFound);
+                    }
+                    //mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    if(device.getAddress().equals("20:14:02:17:10:85")) {
+                        mPairedDevicesArrayAdapter.add("EHH Button" + "\n" + device.getAddress());
+                    }
+
+                }
+
+                // When discovery is finished, change the Activity title
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                setProgressBarIndeterminateVisibility(false);
+                String strSelectDevice = getIntent().getStringExtra("select_device");
+                if(strSelectDevice == null)
+                    strSelectDevice = "Select a device to connect";
+                setTitle(strSelectDevice);
+            }
+        }
+    };
     private Set<BluetoothDevice> pairedDevices;
     private Button scanButton;
+    // The on-click listener for all devices in the ListViews
+    private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
+        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+            // Cancel discovery because it's costly and we're about to connect
+            if(mBtAdapter.isDiscovering())
+                mBtAdapter.cancelDiscovery();
+
+            String strNoFound = getIntent().getStringExtra("no_devices_found");
+            if(strNoFound == null)
+                strNoFound = "No EHH Button found";
+            if(!((TextView) v).getText().toString().equals(strNoFound)) {
+                // Get the device MAC address, which is the last 17 chars in the View
+                String info = ((TextView) v).getText().toString();
+                String address = info.substring(info.length() - 17);
+
+                // Create the result Intent and include the MAC address
+                Intent intent = new Intent();
+                intent.putExtra(BluetoothState.EXTRA_DEVICE_ADDRESS, address);
+
+                // Set result and finish this Activity
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+    };
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +161,6 @@ public class DeviceList extends Activity {
                 mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
 
                 if(device.getAddress().equals("20:14:02:17:10:85"))
-               // if(device.getAddress().equals("9C:F3:87:AB:AA:09"))
                 {
                     mPairedDevicesArrayAdapter.add("EHH Button" + "\n" + device.getAddress());
                 }
@@ -111,11 +171,6 @@ public class DeviceList extends Activity {
             doDiscovery();
         }
 
-        //setHC05();
-        //Intent intent = new Intent();
-        //intent.putExtra(BluetoothState.EXTRA_DEVICE_ADDRESS, "20:14:02:17:10:85");
-        //setResult(Activity.RESULT_OK, intent);
-        //finish();
     }
 
     protected void onDestroy() {
@@ -161,7 +216,6 @@ public class DeviceList extends Activity {
         setTitle(strScanning);
 
         // Turn on sub-title for new devices
-        // findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
         // If we're already discovering, stop it
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
@@ -170,95 +224,5 @@ public class DeviceList extends Activity {
         // Request discover from BluetoothAdapter
         mBtAdapter.startDiscovery();
     }
-
-    // The on-click listener for all devices in the ListViews
-    private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
-        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-            // Cancel discovery because it's costly and we're about to connect
-            if(mBtAdapter.isDiscovering())
-                mBtAdapter.cancelDiscovery();
-
-            String strNoFound = getIntent().getStringExtra("no_devices_found");
-            if(strNoFound == null)
-                strNoFound = "No EHH Button found";
-            if(!((TextView) v).getText().toString().equals(strNoFound)) {
-                // Get the device MAC address, which is the last 17 chars in the View
-                String info = ((TextView) v).getText().toString();
-                String address = info.substring(info.length() - 17);
-
-                // Create the result Intent and include the MAC address
-                Intent intent = new Intent();
-                intent.putExtra(BluetoothState.EXTRA_DEVICE_ADDRESS, address);
-
-                // Set result and finish this Activity
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        }
-    };
-
-    private void setHC05()
-    {
-        if(mBtAdapter.isDiscovering())
-            mBtAdapter.cancelDiscovery();
-
-        //View v = ((ListView)findViewById(R.id.list_devices)).getChildAt(0);
-
-        //String strNoFound = getIntent().getStringExtra("no_devices_found");
-        //if(strNoFound == null)
-            //strNoFound = "No EHH Button found";
-        //if(!((TextView) v ).getText().toString().equals(strNoFound)) {
-            // Get the device MAC address, which is the last 17 chars in the View
-            //String info = ((TextView) v).getText().toString();
-            //String address = info.substring(info.length() - 17);
-
-            // Create the result Intent and include the MAC address
-            Intent intent = new Intent();
-            intent.putExtra(BluetoothState.EXTRA_DEVICE_ADDRESS, "20:14:02:17:10:85");
-
-            // Set result and finish this Activity
-            setResult(Activity.RESULT_OK, intent);
-            finish();
-        //}
-    }
-
-
-    // The BroadcastReceiver that listens for discovered devices and
-    // changes the title when discovery is finished
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            // When discovery finds a device
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                // If it's already paired, skip it, because it's been listed already
-                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    String strNoFound = getIntent().getStringExtra("no_devices_found");
-                    if(strNoFound == null)
-                        strNoFound = "No EHH Button found";
-
-                    if(mPairedDevicesArrayAdapter.getItem(0).equals(strNoFound)) {
-                        mPairedDevicesArrayAdapter.remove(strNoFound);
-                    }
-                    //mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                    if(device.getAddress().equals("20:14:02:17:10:85")) {
-                        mPairedDevicesArrayAdapter.add("EHH Button" + "\n" + device.getAddress());
-                    }
-
-                }
-
-                // When discovery is finished, change the Activity title
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                setProgressBarIndeterminateVisibility(false);
-                String strSelectDevice = getIntent().getStringExtra("select_device");
-                if(strSelectDevice == null)
-                    strSelectDevice = "Select a device to connect";
-                setTitle(strSelectDevice);
-            }
-        }
-    };
 
 }

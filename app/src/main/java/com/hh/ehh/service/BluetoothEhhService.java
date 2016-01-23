@@ -22,31 +22,23 @@ import java.util.UUID;
  */
 public class BluetoothEhhService extends Service {
 
+    // SPP UUID service - this should work for most devices
+    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    // String for MAC address
+    private static String address = "20:14:02:17:10:85";
+    final int handlerState = 0;
+    String txtString;
+    Handler bluetoothIn;
+    private BluetoothAdapter btAdapter = null;
+    private BluetoothSocket btSocket = null;
+    private StringBuilder recDataString = new StringBuilder();
+    private ConnectedThread mConnectedThread;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-
-
-    String txtString;
-    Handler bluetoothIn;
-
-    final int handlerState = 0;        				 //used to identify handler message
-    private BluetoothAdapter btAdapter = null;
-    private BluetoothSocket btSocket = null;
-    private StringBuilder recDataString = new StringBuilder();
-
-    private ConnectedThread mConnectedThread;
-
-    // SPP UUID service - this should work for most devices
-    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-    // String for MAC address
-    private static String address = "20:14:02:17:10:85";
-
-
 
     @Override
     public void onCreate(){
@@ -56,11 +48,11 @@ public class BluetoothEhhService extends Service {
 
         bluetoothIn = new Handler() {
             public void handleMessage(android.os.Message msg) {
-                String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
-                recDataString.append(readMessage);      								//keep appending to string until ~
-                int endOfLineIndex = recDataString.indexOf("#");                    // determine the end-of-line
-                if (endOfLineIndex > 0) {                                           // make sure there data before ~
-                    String dataInPrint = recDataString.substring(0, endOfLineIndex);    // extract string
+                String readMessage = (String) msg.obj;
+                recDataString.append(readMessage);
+                int endOfLineIndex = recDataString.indexOf("#");
+                if (endOfLineIndex > 0) {
+                    String dataInPrint = recDataString.substring(0, endOfLineIndex);
                     txtString = "Data Received = " + dataInPrint;
                     Log.d("Tag", "Received From Bluetooth:" + txtString);
                     if(dataInPrint.equalsIgnoreCase("PANIC")){
@@ -68,15 +60,15 @@ public class BluetoothEhhService extends Service {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }
-                    recDataString = new StringBuilder(); 					//clear all string data
+                    recDataString = new StringBuilder();
                     txtString = "";
                 }
             }
         };
 
 
-        btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
-        //create device and set the MAC address
+        btAdapter = BluetoothAdapter.getDefaultAdapter();
+
         BluetoothDevice device = btAdapter.getRemoteDevice(address);
 
         try {
@@ -84,7 +76,7 @@ public class BluetoothEhhService extends Service {
         } catch (IOException e) {
             Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_LONG).show();
         }
-        // Establish the Bluetooth socket connection.
+
         try
         {
             btSocket.connect();
@@ -94,14 +86,12 @@ public class BluetoothEhhService extends Service {
                 btSocket.close();
             } catch (IOException e2)
             {
-                //insert code to deal with this
+
             }
         }
         mConnectedThread = new ConnectedThread(btSocket);
         mConnectedThread.start();
 
-        //I send a character when resuming.beginning transmission to check device is connected
-        //If it is not an exception will be thrown in the write method and finish() will be called
         mConnectedThread.write("x");
     }
 
@@ -109,22 +99,18 @@ public class BluetoothEhhService extends Service {
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
 
         return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
-        //creates secure outgoing connecetion with BT device using UUID
     }
 
 
-    //create new class for connect thread
     private class ConnectedThread extends Thread {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        //creation of the connect thread
         public ConnectedThread(BluetoothSocket socket) {
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
             try {
-                //Create I/O streams for connection
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) { }
@@ -138,25 +124,23 @@ public class BluetoothEhhService extends Service {
             byte[] buffer = new byte[256];
             int bytes;
 
-            // Keep looping to listen for received messages
             while (true) {
                 try {
-                    bytes = mmInStream.read(buffer);        	//read bytes from input buffer
+                    bytes = mmInStream.read(buffer);
                     String readMessage = new String(buffer, 0, bytes);
-                    // Send the obtained bytes to the UI Activity via handler
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
                 } catch (IOException e) {
                     break;
                 }
             }
         }
-        //write method
+
+
         public void write(String input) {
-            byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
+            byte[] msgBuffer = input.getBytes();
             try {
-                mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
+                mmOutStream.write(msgBuffer);
             } catch (IOException e) {
-                //if you cannot write, close the application
                 Toast.makeText(getBaseContext(), "Connection Failure", Toast.LENGTH_LONG).show();
             }
         }

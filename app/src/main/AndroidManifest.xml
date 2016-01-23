@@ -66,16 +66,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
         </activity>
-         <activity android:name="com.hh.ehh.LoginActivity" />
         <activity  android:name="com.hh.ehh.bluetooth.DeviceList" />
 
 -
-
-        <receiver android:name="com.hh.ehh.sms.SMSReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
-            </intent-filter>
-        </receiver>
 
         <service
             android:name=".service.LocationService"

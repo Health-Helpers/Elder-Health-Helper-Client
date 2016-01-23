@@ -36,7 +36,6 @@ public class LocationService extends Service implements
     private static int DISPLACEMENT = 10; // 10 meters
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
-    private PostLocation postLocation;
     private boolean currentlyProcessingLocation = false;
 
     @Override
@@ -69,58 +68,6 @@ public class LocationService extends Service implements
         Log.e(TAG, "GoogleApiClient connection has been suspend");
     }
 
-
-    private class PostLocation extends AsyncTask<LocationEHH, Void, Void> {
-
-        private SoapWebServiceConnection soapWebServiceConnection;
-        private LocationEHH location;
-        private ProgressDialog dialog;
-
-
-        public PostLocation(SoapWebServiceConnection soapWebServiceConnection, LocationEHH location) {
-            this.soapWebServiceConnection = soapWebServiceConnection;
-            this.location = location;
-            this.location.setLatitude(location.getLatitude());
-            this.location.setLongitude(location.getLongitude());
-            this.location.setPatientId(location.getPatientId());
-        }
-
-
-
-        @Override
-        protected Void doInBackground(LocationEHH... params) {
-            LocationEHH location = params[0];
-            soapWebServiceConnection.sendPatientLocation(location.getPatientId(),location.getDate(),location.getLatitude(),location.getLongitude());
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-          /* dialog = new ProgressDialog(getApplicationContext());
-            dialog.setMessage(getApplicationContext().getResources().getString(R.string.loading));
-            dialog.setIndeterminate(false);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.setCancelable(true);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    postLocation.cancel(true);
-                }
-            });
-            dialog.show();*/
-
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (dialog != null)
-                dialog.cancel();
-        }
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
@@ -151,7 +98,6 @@ public class LocationService extends Service implements
             googleApiClient.disconnect();
         }
     }
-
 
     @Override
     public void onDestroy() {
@@ -191,6 +137,43 @@ public class LocationService extends Service implements
             }
         } else {
             Log.e(TAG, "unable to connect to google play services.");
+        }
+    }
+
+    private class PostLocation extends AsyncTask<LocationEHH, Void, Void> {
+
+        private SoapWebServiceConnection soapWebServiceConnection;
+        private LocationEHH location;
+        private ProgressDialog dialog;
+
+
+        public PostLocation(SoapWebServiceConnection soapWebServiceConnection, LocationEHH location) {
+            this.soapWebServiceConnection = soapWebServiceConnection;
+            this.location = location;
+            this.location.setLatitude(location.getLatitude());
+            this.location.setLongitude(location.getLongitude());
+            this.location.setPatientId(location.getPatientId());
+        }
+
+
+
+        @Override
+        protected Void doInBackground(LocationEHH... params) {
+            LocationEHH location = params[0];
+            soapWebServiceConnection.sendPatientLocation(location.getPatientId(),location.getDate(),location.getLatitude(),location.getLongitude());
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (dialog != null)
+                dialog.cancel();
         }
     }
 }
